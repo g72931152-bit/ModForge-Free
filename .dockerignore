@@ -1,8 +1,0 @@
-.git
-.github
-__pycache__
-*.pyc
-backend/storage/*
-backend/data/*
-tests
-README.md
