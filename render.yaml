@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: modforge-free
-    runtime: docker
-    plan: free
-    region: frankfurt
-    dockerfilePath: ./Dockerfile
-    autoDeploy: true
