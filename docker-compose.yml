@@ -1,0 +1,8 @@
+services:
+  api:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/storage:/app/storage
+      - ./backend/data:/app/data
