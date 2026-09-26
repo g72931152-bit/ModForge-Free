@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080909">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="/assets/logo.png?v=0.26">
+<title>ModForge — BeamNG.drive mod repair</title>
+<link rel="stylesheet" href="/assets/styles.css?v=0.26">
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span></span><span></span><span></span><i></i></div>
+<div class="shell">
+<header class="topbar panel-line">
+  <a class="brand" href="/" aria-label="ModForge">
+    <img src="/assets/logo.png?v=0.26" alt="ModForge">
+    <div><strong id="brandName">ModForge</strong><small id="brandSub">Проверка и безопасное исправление модов</small></div>
+  </a>
+  <div class="top-actions"><span class="release-pill" id="versionBadge">v1 (0.26) · BeamNG 0.39</span><button class="ghost-icon" id="settingsTop" type="button" aria-label="Настройки">⚙</button></div>
+</header>
+
+<main>
+<section class="hero panel-line">
+  <div class="eyebrow-row"><span>BEAMNG.DRIVE 0.39</span><span class="live-dot"><i></i> ONLINE</span></div>
+  <h1>Исправляйте моды<br><em>без лишнего шума.</em></h1>
+  <p>Проверка структуры, конфигураций, ссылок и материалов. Безопасные исправления подтверждаются повторно перед выдачей результата.</p>
+  <div class="hero-tags"><span>11 этапов</span><span>Автоисправление</span><span>Повторная проверка</span><span>До 2 ГБ</span></div>
+</section>
+
+<section class="layout">
+<article class="main panel">
+  <div class="section-head"><div><span class="section-id">01</span><div><b>Входные данные</b><small>ZIP · папка · отдельный BeamNG-ресурс</small></div></div><button class="text-action" id="clearBtn" type="button">Сбросить</button></div>
+  <div class="dropzone" id="dropzone" tabindex="0">
+    <div class="drop-symbol">＋</div>
+    <strong id="dropTitle">Выберите то, что хотите проверить</strong>
+    <span id="dropSub">ZIP, папка или один поддерживаемый файл BeamNG.drive.</span>
+    <div class="drop-buttons">
+      <button class="btn primary" id="zipBtn" type="button">ZIP</button>
+      <button class="btn" id="folderBtn" type="button">Папка</button>
+      <button class="btn" id="fileBtn" type="button">Файл</button>
+    </div>
+    <input id="zipInput" type="file" accept=".zip,application/zip" hidden>
+    <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+    <input id="fileInput" type="file" accept=".jbeam,.pc,.json,.jsonc,.lua,.materials,.materials.json,.level.json,.cs,.cfg,.prefab,.dae,.cdae,.dds,.png,.jpg,.jpeg,.tga,.bmp,.gif,.mis,.forest,.ter" hidden>
+    <div class="selection" id="selection" hidden></div>
+  </div>
+
+  <div class="config-grid">
+    <section class="config-box"><div class="config-title"><span>02</span><b>Приоритет проверки</b><small>Необязательно</small></div><div class="chips" id="priorityChips"><button class="chip" data-priority="textures" type="button">Текстуры</button><button class="chip" data-priority="glass" type="button">Стекло</button><button class="chip" data-priority="jbeam" type="button">JBeam</button><button class="chip" data-priority="lighting" type="button">Освещение</button><button class="chip" data-priority="all" type="button">Всё</button></div></section>
+    <section class="config-box"><div class="config-title"><span>03</span><b>Формат результата</b><small>Определяется до старта</small></div><select id="outputType"><option value="zip">Исправленный ZIP</option><option value="same">Тот же формат — только для одного файла</option></select><p class="micro">Папка и набор файлов выдаются как ZIP, чтобы сохранить структуру мода.</p></section>
+  </div>
+
+  <div class="config-box full"><div class="config-title"><span>04</span><b>Что проверить особенно внимательно</b><small>Можно описать своими словами</small></div><textarea id="wishes" placeholder="Например: сначала стекло и текстуры, затем JBeam. Не менять спорные места автоматически."></textarea></div>
+
+  <div class="config-box full"><div class="config-title"><span>05</span><b>Имя результата</b><small>Персонализация</small></div><button class="custom-line" id="settingsBtn" type="button"><span>Суффикс</span><strong id="suffixPreview">FIXED</strong><span>›</span></button><p class="micro">Например: MyMod_FIXED.zip → MyMod_CLEAN.zip</p></div>
+
+  <div class="start-area">
+    <button class="start-button" id="startBtn" type="button" disabled><span class="start-icon">→</span><span class="start-label" id="startLabel">Начать проверку</span><span class="start-spinner" id="startSpinner" aria-hidden="true"></span></button>
+    <div><b id="readyState">Ожидается файл</b><small>Перед запуском ModForge проверит связь с backend.</small></div>
+  </div>
+</article>
+
+<aside class="sidebar">
+  <section class="panel info-card"><span class="eyebrow">CURRENT RELEASE</span><strong class="big-version">v1 (0.26)</strong><p>Стабильная ветка · BeamNG.drive 0.39</p><div class="mini-grid"><div><b>11</b><span>этапов</span></div><div><b>✓</b><span>re-check</span></div><div><b>✓</b><span>repair</span></div></div></section>
+  <section class="panel info-card"><span class="eyebrow">ОГРАНИЧЕНИЯ</span><h3>Что сервис не обещает</h3><p>ModForge не запускает BeamNG.drive для живого 3D-рендера, не гарантирует исправление неизвестной Lua-логики и физики и не копирует закрытые игровые ассеты.</p></section>
+  <section class="ad-slot" id="adSlot" hidden></section>
+</aside>
+</section>
+
+<section class="panel process" id="process" hidden>
+  <div class="process-top"><div><span class="eyebrow">PROCESS</span><h2 id="processTitle">Подготовка</h2><p id="processDetail">—</p></div><div class="progress-number"><strong id="overallPct">0%</strong><span id="stageCount">0 / 11</span></div></div>
+  <div class="progress-track"><i id="progressBar"></i></div>
+  <div class="process-state"><span id="progressState">Подготовка…</span><span id="eta">Осталось: —</span></div>
+  <div class="process-actions"><button class="btn" id="pauseBtn" type="button">Пауза</button><button class="btn" id="filesBtn" type="button">Файлы</button><button class="btn danger" id="resetJobBtn" type="button">Остановить</button></div>
+  <div class="stage-list" id="stageGrid"></div>
+</section>
+
+<section class="panel result" id="result" hidden>
+  <div class="result-head"><div><span class="eyebrow">RESULT</span><h2 id="resultTitle">Готово</h2><p id="resultLead">—</p></div><div class="result-symbol" id="resultMark">✓</div></div>
+  <div class="result-stats"><div><b id="statFiles">0</b><span>файлов</span></div><div><b id="statFixed">0</b><span>исправлено</span></div><div><b id="statWarnings">0</b><span>предупреждений</span></div><div><b id="statChecks">0</b><span>OK</span></div></div>
+  <div class="issue-list" id="issueList"></div>
+  <div class="result-actions"><a class="btn primary" id="downloadBtn" href="#">Скачать результат</a><a class="btn" id="reportBtn" href="#">JSON-отчёт</a></div>
+</section>
+
+<footer class="footer"><span>ModForge v1 (0.26) · BeamNG.drive 0.39</span><span>Обработка временная · большие загрузки могут получить cooldown</span></footer>
+</main>
+</div>
+
+<div class="modal" id="modal" hidden><div class="modal-card" role="dialog" aria-modal="true"><button class="modal-close" id="modalClose" type="button" aria-label="Закрыть">×</button><div id="modalContent"></div><div class="modal-actions" id="modalActions"></div></div></div>
+<script src="/assets/app.js?v=0.26" defer></script>
+</body>
+</html>
