@@ -1,0 +1,18 @@
+{
+  "brand_name": "ModForge",
+  "tagline": "Проверка и безопасное исправление модов BeamNG.drive",
+  "support_url": "",
+  "support_label": "Поддержать проект",
+  "ad_enabled": false,
+  "ad_html": "",
+  "default_suffix": "FIXED",
+  "release_version": "v1",
+  "beamng_version": "0.41",
+  "privacy_version": "2026-09-26",
+  "release_id": "v1 (0.41)",
+  "network_profiles": {
+    "standard": 2,
+    "balanced": 5,
+    "aggressive": 20
+  }
+}
