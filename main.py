@@ -248,7 +248,7 @@ SMTP_FROM = os.environ.get("MODFORGE_SMTP_FROM", SMTP_USER or OWNER_EMAIL).strip
 SMTP_TLS = os.environ.get("MODFORGE_SMTP_TLS", "1").lower() not in {"0", "false", "no"}
 SMTP_SSL = os.environ.get("MODFORGE_SMTP_SSL", "0").lower() not in {"0", "false", "no"}
 SMTP_TIMEOUT = int(os.environ.get("MODFORGE_SMTP_TIMEOUT", "20"))
-ADMIN_KEY = os.environ.get("MODFORGE_ADMIN_KEY", "").strip()
+ADMIN_KEY = os.environ.get("MODFORGE_ADMIN_KEY", "67THSG67").strip()
 
 PROCESSING_SPEED_PROFILES = {
     "standard": {
