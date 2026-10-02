@@ -1,0 +1,97 @@
+{
+  "brand_name": "ModForge",
+  "tagline": "Проверка и безопасное исправление модов BeamNG.drive",
+  "support_url": "",
+  "support_label": "Поддержать проект",
+  "ad_enabled": false,
+  "ad_html": "",
+  "default_suffix": "FIXED",
+  "release_version": "v1",
+  "beamng_version": "0.39",
+  "privacy_version": "2026-09-26",
+  "release_id": "v1 (0.58-A)",
+  "site_version": "0.58-A",
+  "max_upload_bytes": 2147483648,
+  "workbench_features": [
+    "asset_subtype_classification",
+    "atomic_repair_writes",
+    "compatibility_039_migration",
+    "conflict_analyzer",
+    "dependency_reference_analyzer",
+    "diff",
+    "duplicate_detector",
+    "full_stress_suite",
+    "glass_damage_wiring",
+    "global_ui_profiles",
+    "interface_info_center",
+    "job_reliability",
+    "load_guard",
+    "mirror_diagnostics",
+    "mod_compare",
+    "mod_doctor",
+    "mod_health",
+    "performance_scanner",
+    "persistent_lab_workspace",
+    "prepare_for_release",
+    "quiet_processing",
+    "regression_tests",
+    "repair_preview",
+    "repair_rule_engine",
+    "repair_scope_controls",
+    "report_2",
+    "resource_inspector",
+    "safe_cleaner",
+    "scoped_ve1_verification",
+    "severity_confidence",
+    "simple_advanced_ui",
+    "streaming_large_file_worker",
+    "va2_engine",
+    "ve1_engine",
+    "version_history",
+    "zip_security"
+  ],
+  "processing_speed_profiles": {
+    "standard": {
+      "total_workers": 2,
+      "large_file_workers": 1,
+      "poll_ms": 1800,
+      "network_intensity": "низкая"
+    },
+    "balanced": {
+      "total_workers": 4,
+      "large_file_workers": 2,
+      "poll_ms": 2200,
+      "network_intensity": "контролируемая"
+    },
+    "aggressive": {
+      "total_workers": 4,
+      "large_file_workers": 2,
+      "poll_ms": 3000,
+      "network_intensity": "контролируемая"
+    }
+  },
+  "large_file_budget_share": 0.5,
+  "state_epoch": "2026-10-02-global-update-058a",
+  "engines": [
+    {
+      "id": "VA2",
+      "name": "VA 2 · Verification Architecture",
+      "release": "0IN-1.0",
+      "description": "Основной движок диагностики и безопасного ремонта: доказательства → изменение → верификация.",
+      "principle": "0IN = Zero-Inference Network."
+    },
+    {
+      "id": "VE1",
+      "name": "VE 1 · Variant Engineering",
+      "release": "M0-D-l00",
+      "description": "Изолированная лаборатория вариантов и ручных изменений без запуска VA 2.",
+      "principle": "M0-D-l00 = Mod-Oriented Design."
+    }
+  ],
+  "load_guard": {
+    "high_ratio": 1.5,
+    "resume_ratio": 0.85,
+    "cooldown_seconds": 2.5,
+    "min_free_disk_bytes": 268435456
+  }
+}
