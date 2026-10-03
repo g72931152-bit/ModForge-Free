@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: modmendryx-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: MODMENDRYX_PUBLIC_URL
+        value: https://modmendryx.pages.dev
+      - key: MODMENDRYX_CORS_ORIGINS
+        value: https://modmendryx.pages.dev,https://modmendryx-api.onrender.com
+      - key: PYTHONUNBUFFERED
+        value: "1"

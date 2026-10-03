@@ -1,0 +1,16 @@
+/*
+  Security defaults for the static frontend.
+*/
+/*
+  /api/*
+    Access-Control-Allow-Origin: https://modmendryx.pages.dev
+    Access-Control-Allow-Methods: GET,HEAD,POST,OPTIONS
+    Access-Control-Allow-Headers: Content-Type, X-ModForge-Admin-Key
+*/
+/*
+  /*
+    X-Content-Type-Options: nosniff
+    Referrer-Policy: strict-origin-when-cross-origin
+    Permissions-Policy: geolocation=(), microphone=(), camera=()
+    X-Frame-Options: SAMEORIGIN
+*/

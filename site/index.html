@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="ru" data-phase="idle">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060708" id="themeColorMeta">
+<meta name="description" content="ModMendryx — диагностика и автоматическое исправление модов BeamNG.drive: ресурсы, конфигурации, материалы, AI-трафик и повторная проверка результата.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://modmendryx.pages.dev/">
+<meta property="og:type" content="website"><meta property="og:title" content="ModMendryx — исправление модов BeamNG.drive"><meta property="og:description" content="Проверка, фактический ремонт и повторная верификация модов BeamNG.drive."><meta property="og:url" content="https://modmendryx.pages.dev/"><meta property="og:image" content="https://modmendryx.pages.dev/assets/banner.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="ModMendryx — исправление модов BeamNG.drive"><meta name="twitter:description" content="Автоматическая диагностика и восстановление модов BeamNG.drive.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"ModMendryx","url":"https://modmendryx.pages.dev/","applicationCategory":"DeveloperApplication","operatingSystem":"Web","isAccessibleForFree":true,"description":"Диагностика, ремонт и подготовка модов BeamNG.drive.","softwareVersion":"0.62-A"}</script>
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="/assets/logo.png?v=062a">
+<title>ModMendryx · V1 (0.62-A) · BeamNG.drive 0.39</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="/assets/styles.css?v=062a">
+</head>
+<body>
+
+<!-- Animated background canvas -->
+<canvas id="bgCanvas" class="bg-canvas" aria-hidden="true"></canvas>
+<div class="ambient" aria-hidden="true">
+  <span class="a1"></span><span class="a2"></span><span class="a3"></span>
+  <span class="a4"></span><span class="a5"></span>
+  <i class="scanline"></i>
+</div>
+
+<!-- Session recovery banner -->
+<div id="sessionBanner" class="session-banner" hidden>
+  <div class="session-inner">
+    <div class="session-icon">⏱</div>
+    <div class="session-text">
+      <strong>Незавершённая сессия</strong>
+      <span id="sessionDesc">Предыдущая задача была прервана.</span>
+    </div>
+    <div class="session-actions">
+      <button class="btn small primary" id="sessionResume" type="button">Продолжить</button>
+      <button class="btn small" id="sessionDismiss" type="button">Сбросить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<!-- Session history drawer -->
+<aside id="historyDrawer" class="history-drawer" hidden aria-label="История сессий">
+  <div class="history-backdrop" data-history-close></div>
+  <div class="history-card" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="history-head">
+      <div><span class="eyebrow">СЕССИИ</span><h2 id="historyTitle">Прошлые задачи</h2><p>Сохранённые номера сессий и результаты, которые были скачаны.</p></div>
+      <button class="ghost-icon" type="button" data-history-close aria-label="Закрыть">✕</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+    <div class="history-foot"><span class="micro">Хранятся локально на этом устройстве. Серверные результаты могут истечь по сроку хранения.</span><button class="btn small" id="historyClearBtn" type="button">Очистить историю</button></div>
+  </div>
+</aside>
+
+<!-- Confetti canvas (shown on success) -->
+<canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+<!-- Snake game overlay -->
+<div id="gameOverlay" class="game-overlay" hidden aria-label="Мини-игры">
+  <div class="game-panel">
+    <div class="game-header">
+      <div class="game-title"><span class="eyebrow">ПОКА ИДЁТ ЗАДАЧА</span><strong id="gameTitle">Змейка</strong></div>
+      <div class="game-meta"><span id="gameScoreBlock"><span>Счёт</span> <strong id="snakeScore">0</strong></span><span id="gameHiBlock"><span>Рекорд</span> <strong id="snakeHi">0</strong></span><button class="ghost-icon" id="gameMinimize" type="button" title="Свернуть">─</button><button class="ghost-icon" id="gameClose" type="button" title="Закрыть">✕</button></div>
+    </div>
+    <div class="game-tabs" role="tablist" aria-label="Игра">
+      <button type="button" class="game-tab active" data-game="snake">Змейка</button>
+      <button type="button" class="game-tab" data-game="reaction">Реакция</button>
+    </div>
+    <div class="game-stage" data-game-panel="snake"><canvas id="snakeCanvas" width="300" height="300"></canvas></div>
+    <div class="game-stage reaction-stage" data-game-panel="reaction" hidden><button id="reactionTarget" class="reaction-target" type="button">ГОТОВЬСЯ</button><div class="reaction-timer" id="reactionTimer">—</div></div>
+    <div class="game-footer"><span id="gameStatus" class="game-status">Пробел или тап для старта</span><span class="game-controls-hint" id="gameControlsHint">← ↑ → ↓ · WASD · свайп</span></div>
+  </div>
+</div>
+
+<div class="shell">
+<header class="topbar panel-line">
+  <button class="brand brand-button" id="brand" type="button" aria-label="ModMendryx"><span class="brand-task-dot" id="brandTaskDot" aria-hidden="true"></span>
+    <img src="/assets/logo.png?v=062a" alt="ModMendryx">
+    <div>
+      <strong id="brandName">ModMendryx</strong>
+      <small id="brandSub">Проверка и безопасное исправление модов</small>
+    </div>
+  </button>
+  <div class="top-actions">
+    <span class="release-pill" id="versionBadge">V1 · 0.62-A</span>
+    <button class="top-link" id="feedbackTop" type="button">Обратная связь</button>
+    <button class="top-info" id="interfaceInfoTop" type="button"><span aria-hidden="true">ⓘ</span><b>Интерфейс</b></button>
+    <button class="ghost-icon" id="paletteTop" type="button" aria-label="Палитра" title="Палитра"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 0 0 16h1.3a1.7 1.7 0 0 0 0-3.4h-.8a1.7 1.7 0 0 1 0-3.4H15a5 5 0 0 0 5-5c0-2.8-3.2-4.8-8-4.8Z"/><circle cx="7.5" cy="10" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14" cy="7.2" r="1"/><circle cx="16.5" cy="10" r="1"/></svg></button>
+    <button class="profile-chip" id="profileTop" type="button" aria-label="Профиль" title="Профиль и персонализация">
+      <span class="profile-avatar" id="profileAvatar">G</span>
+      <span class="profile-copy"><b id="profileName">Гость</b><small id="profileState">Локальный профиль</small></span>
+      <span class="profile-chevron">⌄</span>
+    </button>
+    <button class="ghost-icon history-trigger" id="historyTop" type="button" aria-label="История сессий" title="Прошлые сессии" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+    </button>
+    <button class="ghost-icon" id="settingsTop" type="button" aria-label="Настройки" title="Настройки">⚙</button>
+  </div>
+</header>
+
+<main>
+<!-- Session banner slot -->
+<div id="sessionSlot"></div>
+
+<section class="hero panel-line">
+  <div class="hero-banner-media" id="heroBannerMedia" aria-hidden="true"><span class="banner-glow"></span></div>
+  <div class="eyebrow-row">
+    <span>BEAMNG.DRIVE · MODMENDRYX</span><span class="target-note">Текущий релиз</span>
+  </div>
+  <h1>Исправляйте моды<br><em>без лишнего шума.</em></h1>
+  <p>Структура · Конфигурации · Ресурсы · Материалы · Глубокая проверка · Исправление · Повторная проверка — всё автоматически.</p>
+  <div class="hero-tags">
+    <span>15 этапов</span>
+    <span>Запрос → типовые ошибки</span>
+    <span>VE 1 Lab</span>
+    <span>Re-check</span>
+    <span>До 2 ГБ</span>
+    <span>Сохранение сессии</span>
+  </div>
+  <div class="hero-personal" id="heroPersonal">
+    <span class="hero-personal-dot" aria-hidden="true"></span>
+    <div><b id="greetingLine">Рабочее пространство готово</b><small id="profileSummary">Локальные настройки сохраняются на этом устройстве.</small></div>
+    <button class="text-action" id="heroProfileBtn" type="button">Настроить профиль</button>
+  </div>
+</section>
+
+<section class="layout">
+<article class="main panel">
+  <div class="section-head">
+    <div>
+      <span class="section-kicker">INPUT</span>
+      <div>
+        <b>Входные данные</b>
+        <small>ZIP · папка · отдельный BeamNG-ресурс</small>
+      </div>
+    </div>
+    <button class="text-action" id="clearBtn" type="button">Сбросить</button>
+  </div>
+
+  <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Выбрать файл для проверки">
+    <div class="drop-symbol">＋</div>
+    <strong id="dropTitle">Выберите то, что хотите проверить</strong>
+    <span id="dropSub">ZIP-архив, папка мода или отдельный BeamNG-файл.</span>
+    <div class="drop-buttons" id="dropButtons">
+      <button class="btn primary picker-btn" id="zipBtn" type="button" data-label="ZIP"><span class="picker-icon icon-zip" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 4h14l4 4v20H7z"/><path d="M12 4v6h6V4M12 14h2m3 0h2m-7 4h2m3 0h2m-7 4h2m3 0h2"/></svg></span><span class="picker-label">ZIP</span></button>
+      <button class="btn picker-btn" id="folderBtn" type="button" data-label="Папка"><span class="picker-icon icon-folder" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M3.5 9.5h9l3 3H28a1.5 1.5 0 0 1 1.5 1.5v11A2.5 2.5 0 0 1 27 27.5H5A2.5 2.5 0 0 1 2.5 25V11A1.5 1.5 0 0 1 4 9.5z"/></svg></span><span class="picker-label">Папка</span></button>
+      <button class="btn picker-btn" id="fileBtn" type="button" data-label="Файл"><span class="picker-icon icon-file" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M7 3.5h12l6 6V28.5H7z"/><path d="M19 3.5v7h6M11 16h10M11 20h10M11 24h6"/></svg></span><span class="picker-label">Файл</span></button>
+    </div>
+    <input id="zipInput" type="file" accept=".zip,application/zip" hidden>
+    <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+    <input id="fileInput" type="file" accept=".jbeam,.pc,.json,.jsonc,.lua,.materials,.materials.json,.level.json,.cs,.cfg,.prefab,.dae,.cdae,.dds,.png,.jpg,.jpeg,.tga,.bmp,.gif,.mis,.forest,.ter" hidden>
+    <div class="selection" id="selection" hidden></div>
+  </div>
+
+
+  <div class="workspace-mode" id="workspaceMode">
+    <span class="micro">Режим интерфейса</span>
+    <button class="btn small" id="uiModeBtn" type="button">Simple → Advanced</button>
+  </div>
+  <div class="workflow-switch" id="taskMode">
+    <button type="button" class="workflow-tab active" data-task="repair"><span>VA 2</span><strong>VA 2 · Verification Architecture</strong><small>Диагностика, безопасный ремонт и повторная проверка в отдельном контуре.</small></button>
+    <button type="button" class="workflow-tab" data-task="modify"><span>VE 1</span><strong>VE 1 · Variant Engineering</strong><small>Изолированная лаборатория: выбрать вариант, изменить параметры и отдельно экспортировать результат.</small></button>
+  </div>
+
+  <div class="config-box full request-box" id="repairConfig">
+    <div class="config-title"><span class="section-kicker">FOCUS</span><b>Что проверять в первую очередь</b><small>Можно выбрать несколько</small></div>
+    <div class="chips" id="priorityChips">
+      <button class="chip" data-priority="textures" type="button">Текстуры</button>
+      <button class="chip" data-priority="glass" type="button">Стекло</button>
+      <button class="chip" data-priority="jbeam" type="button">JBeam</button>
+      <button class="chip" data-priority="lighting" type="button">Освещение</button>
+      <button class="chip" data-priority="configs" type="button">Конфигурации</button>
+      <button class="chip" data-priority="wheels" type="button">Колёса</button>
+      <button class="chip" data-priority="sounds" type="button">Звуки</button>
+      <button class="chip" data-priority="materials" type="button">Материалы</button>
+      <button class="chip" data-priority="all" type="button">Полная проверка</button>
+    </div>
+    <p class="micro">Выбор не отключает остальные проверки: после прицельной проверки ModMendryx всё равно проходит типовые проблемы.</p>
+  </div>
+
+  <div class="config-box full request-box" id="wishesBox">
+    <div class="config-title"><span class="section-kicker">REQUEST</span><b>Опишите проблему своими словами</b><small>Можно без терминов</small></div>
+    <textarea id="wishes" placeholder="Например: сначала проверь стекло и NO TEXTURE, потом освещение. В салоне пропадает окно из водительской камеры."></textarea>
+    <div class="request-preview" id="requestPreview"><span>Пока ничего не выбрано</span></div>
+  </div>
+
+
+  <section class="advanced-tools" id="advancedTools" hidden>
+    <div class="config-title"><span>ADV</span><b>Advanced Workbench</b><small>Диагностика без лишних действий</small></div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <b>MOD DOCTOR</b><small>Опишите симптом — сначала получите причины и доказательства.</small>
+        <textarea id="doctorQuery" placeholder="Например: машина не едет, после ремонта пропало стекло…"></textarea>
+        <button class="btn small" id="doctorBtn" type="button">Диагностировать</button>
+      </div>
+      <div class="tool-card">
+        <b>MOD COMPARE</b><small>Сравнение двух ZIP по путям и SHA-256.</small>
+        <div class="tool-row"><input id="compareA" type="file" accept=".zip"><input id="compareB" type="file" accept=".zip"></div>
+        <button class="btn small" id="compareBtn" type="button">Сравнить моды</button>
+      </div>
+      <div class="tool-card">
+        <b>INSPECTOR</b><small>References, referenced by, missing, unused, shared dependencies и дубли.</small>
+        <button class="btn small" id="inspectorBtn" type="button">Открыть Resource Inspector</button>
+      </div>
+      <div class="tool-card">
+        <b>RELEASE CHECK</b><small>Repair snapshot → safe cleaner → повторная проверка → Release ZIP.</small>
+        <button class="btn small primary" id="releaseBtn" type="button">PREPARE FOR RELEASE</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="config-box full mod-lab-box" id="modLab" hidden>
+    <div class="config-title"><span class="section-kicker">VE 1</span><b>VE 1 · рабочее изменение</b><small>Текстовое задание</small></div>
+    <textarea id="modRequest" placeholder="Например: сделай подвеску мягче на 15%, двигатель чуть мощнее и добавь 2 дополнительные конфигурации."></textarea>
+    <div class="mod-shortcuts" id="modShortcuts">
+      <button class="chip" type="button" data-mod-template="Сделать подвеску мягче на 15%.">Мягче</button>
+      <button class="chip" type="button" data-mod-template="Сделать подвеску жёстче на 15%.">Жёстче</button>
+      <button class="chip" type="button" data-mod-template="Увеличить тягу двигателя на 10%.">Двигатель +10%</button>
+      <button class="chip" type="button" data-mod-template="Добавить 2 дополнительные конфигурации.">+2 конфигурации</button>
+    </div>
+    <p class="micro">VE 1 изменяет только распознанные безопасные параметры и сохраняет отдельный журнал изменений. Неопределённые запросы не маскируются под успешный результат.</p>
+  </div>
+
+  <div class="config-grid">
+    <section class="config-box">
+      <div class="config-title"><span class="section-kicker">DEPTH</span><b>Режим исправления VA 2</b><small>Глубина</small></div>
+      <div class="mode-grid compact" id="repairMode">
+        <button type="button" class="mode-card active" data-mode="standard"><strong>Стандартный</strong><span>7 блоков</span><small>Подтверждённые изменения и базовая целостность.</small></button>
+        <button type="button" class="mode-card" data-mode="medium"><strong>Средний</strong><span>11 блоков</span><small>Глубже: связанные ресурсы и типовые проблемы.</small></button>
+        <button type="button" class="mode-card" data-mode="aggressive"><strong>Агрессивный</strong><span>15 блоков</span><small>Самая глубокая проверка и повторная валидация.</small></button>
+      </div>
+      <button class="mode-info-btn" id="modeInfo" type="button">Чем отличаются режимы</button>
+    </section>
+    <section class="config-box">
+      <div class="config-title"><span class="section-kicker">OUTPUT</span><b>Формат результата</b><small>До старта</small></div>
+      <select id="outputType">
+        <option value="zip">Исправленный ZIP</option>
+        <option value="same">Тот же формат (один файл)</option>
+      </select>
+      <p class="micro">Папка и набор файлов → ZIP с сохранением структуры.</p>
+    </section>
+  </div>
+
+  <div class="config-box full network-box">
+    <div class="config-title"><span class="section-kicker">SPEED</span><b>Скорость обработки</b><small>Отдельно от глубины Repair</small></div>
+    <div class="network-row">
+      <div class="network-presets" id="networkPresets">
+        <button class="network-card active" type="button" data-network="standard"><strong>Стандарт</strong><span>Обычная</span><small>баланс скорости и нагрузки</small></button>
+        <button class="network-card" type="button" data-network="balanced"><strong>Быстрее</strong><span>Приоритет скорости</span><small>больше параллельной обработки</small></button>
+        <button class="network-card" type="button" data-network="aggressive"><strong>Агрессивно быстрее</strong><span>Максимум</span><small>предел текущего хостинга</small></button>
+      </div>
+      <div class="network-meter">
+        <div><span>Профиль</span><strong id="networkLimitLabel">Обычная</strong></div>
+        <div><span>Интенсивность</span><strong id="networkUsageLabel">обычная</strong></div>
+      </div>
+    </div>
+    <p class="micro">Профиль задаёт интенсивность backend, а не фиксированную скорость. Для крупных файлов отдельный поток получает половину рабочего бюджета; при перегрузке VA 2 автоматически уходит в короткий cooldown и продолжает с сохранённого места.</p>
+  </div>
+
+  <div class="config-box full settings-line-box">
+    <div class="config-title"><span class="section-kicker">NAMING</span><b>Имя результата</b><small>Персонализация</small></div>
+    <button class="custom-line" id="settingsBtn" type="button"><span>Суффикс</span><strong id="suffixPreview">FIXED</strong><span>›</span></button>
+  </div>
+
+  <div class="vehicle-detect" id="vehicleDetect" hidden><div class="vehicle-detect-copy"><span class="eyebrow">BEAMNG VEHICLE</span><b id="vehicleDetectTitle">Автомобильный мод обнаружен</b><small id="vehicleDetectMeta">В результат добавится метка ModMendryx: название автомобиля и его preview-изображение. UI Apps вручную добавлять не нужно.</small></div><span class="vehicle-detect-mark">MF</span></div>
+
+  <div class="start-area">
+    <button class="start-button" id="startBtn" type="button" disabled>
+      <span class="start-icon">→</span>
+      <span class="start-label" id="startLabel">Начать проверку</span>
+      <span class="start-spinner" id="startSpinner" aria-hidden="true"></span>
+    </button>
+    <div class="start-info">
+      <b id="readyState">Ожидается файл</b>
+      <small>Перед запуском ModMendryx проверит связь с backend.</small>
+      <div class="kbd-wrap" aria-label="Горячая клавиша">
+        <kbd>Ctrl</kbd><span>+</span><kbd>↵ Enter</kbd><span>— запустить</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<aside class="sidebar">
+  <section class="panel info-card">
+    <span class="eyebrow">ТЕКУЩИЙ РЕЛИЗ</span>
+    <strong class="big-version">v1</strong>
+    <p>Target profile · BeamNG.drive 0.39</p>
+    <div class="mini-grid">
+      <div><b>15</b><span>этапов</span></div>
+      <div><b>✓</b><span>re-check</span></div>
+      <div><b>✓</b><span>сессии</span></div>
+    </div>
+  </section>
+  <section class="panel info-card profile-card" id="profileCard">
+    <div class="profile-card-top">
+      <span class="eyebrow">ВАШ ПРОФИЛЬ</span>
+      <span class="profile-state-dot" id="profileStateDot" aria-hidden="true"></span>
+    </div>
+    <div class="profile-card-main">
+      <span class="profile-avatar large" id="profileAvatarLarge">G</span>
+      <div><h3 id="profileCardName">Гость</h3><p id="profileCardMeta">Локальный профиль · без аккаунта</p></div>
+    </div>
+    <div class="profile-metrics">
+      <div><b id="metricRuns">0</b><span>задач</span></div>
+      <div><b id="metricFixed">0</b><span>исправлений</span></div>
+      <div><b id="metricMode">STD</b><span>режим</span></div>
+    </div>
+    <div class="profile-last" id="profileLast">Последняя задача: пока нет запусков</div>
+    <button class="btn small" id="profileEditBtn" type="button">Персонализировать</button>
+  </section>
+  <section class="panel info-card">
+    <span class="eyebrow">ОГРАНИЧЕНИЯ</span>
+    <h3>Что сервис не обещает</h3>
+    <p>ModMendryx не запускает BeamNG.drive для живого 3D-рендера, не гарантирует исправление неизвестной Lua-логики и физики и не копирует закрытые игровые ассеты.</p>
+  </section>
+  <section class="panel info-card snake-promo" id="snakePromo">
+    <span class="eyebrow">МИНИ-ИГРА</span>
+    <h3>Змейка + реакция</h3>
+    <p>Пока задача выполняется, можно переключаться между Змейкой и игрой на реакцию. Окно можно свернуть.</p>
+    <button class="btn small" id="snakePromoBtn" type="button">Открыть игры</button>
+  </section>
+  <section class="ad-slot" id="adSlot" hidden></section>
+</aside>
+</section>
+
+<!-- Preflight section: visible immediately after upload, before either engine starts -->
+<section class="panel preparation" id="preparationPanel" hidden aria-live="polite">
+  <div class="preparation-head">
+    <div><span class="eyebrow">ПРЕДВАРИТЕЛЬНЫЙ ОСМОТР</span><h2 id="preparationTitle">Файл разобран — движок ещё не запущен</h2><p id="preparationMeta">Здесь показано, что ModMendryx нашёл внутри загруженного мода до начала ремонта.</p></div>
+    <span class="preparation-state" id="preparationState">ГОТОВО</span>
+  </div>
+  <div class="preparation-grid">
+    <div class="preparation-card"><span class="eyebrow">СВОДКА</span><b id="preparationSummary">—</b><small id="preparationSummarySub">—</small></div>
+    <div class="preparation-card"><span class="eyebrow">AI-ТРАФИК</span><b id="preparationAi">Проверка не выполнялась</b><small id="preparationAiSub">—</small></div>
+    <div class="preparation-card"><span class="eyebrow">ХРАНЕНИЕ</span><b id="preparationStorage">—</b><small id="preparationStorageSub">Контроль крупного файла</small></div>
+    <div class="preparation-card"><span class="eyebrow">РЕКОМЕНДАЦИЯ</span><b id="preparationNext">—</b><small>Решение можно изменить до запуска движка.</small></div>
+  </div>
+  <div class="preparation-findings" id="preparationFindings"></div>
+  <div class="preparation-actions">
+    <button class="btn" id="preparationDetailsBtn" type="button">Подробнее о находках</button>
+    <button class="btn" id="preparationCancelBtn" type="button">Отменить</button>
+    <button class="btn primary" id="preparationStartBtn" type="button">Запустить движок</button>
+  </div>
+</section>
+
+<!-- Process section -->
+<section class="panel process" id="process" hidden>
+  <div class="process-top">
+    <div class="process-heading">
+      <span class="eyebrow">ОБРАБОТКА</span>
+      <h2 id="processTitle">Подготовка</h2>
+      <p id="processDetail">—</p>
+    </div>
+    <div class="progress-number">
+      <strong id="overallPct">0%</strong>
+      <span id="stageCount">0 / —</span>
+    </div>
+  </div>
+
+  <div class="progress-track">
+    <i id="progressBar"></i>
+  </div>
+
+  <div class="process-state">
+    <span id="progressState">Подготовка…</span>
+    <span id="eta">Осталось: —</span>
+  </div>
+  <button class="text-action process-details-toggle" id="processDetailsBtn" type="button" hidden>Показать этапы</button>
+  <div class="connection-warning" id="connectionWarning" hidden role="status" aria-live="polite"><span class="connection-warning-icon">!</span><div><b>Соединение с backend замедлилось</b><small>Ответ ещё ожидается. Задача не отменена. Если соединение восстановится, текущая проверка продолжится автоматически.</small></div></div>
+
+  <!-- Buttons: hidden during preparation, shown during processing -->
+  <div class="process-actions" id="processActions">
+    <button class="btn phase-processing-only" id="pauseBtn" type="button">Пауза</button>
+    <button class="btn phase-processing-only" id="filesBtn" type="button">Файлы</button>
+    <button class="btn danger phase-running-only" id="resetJobBtn" type="button">Остановить</button>
+  </div>
+
+  <div class="stage-list" id="stageGrid"></div>
+</section>
+
+<!-- Result section -->
+<section class="panel result" id="result" hidden>
+  <div class="result-head">
+    <div>
+      <span class="eyebrow">РЕЗУЛЬТАТ</span>
+      <h2 id="resultTitle">Готово</h2>
+      <p id="resultLead">—</p><div class="result-meta" id="resultMode"></div><div class="apply-status" id="applyStatus" hidden></div>
+    </div>
+    <div class="result-symbol" id="resultMark">✓</div>
+  </div>
+  <div class="result-stats">
+    <div><b id="statFiles">0</b><span>файлов</span></div>
+    <div><b id="statFixed">0</b><span>исправлено</span></div>
+    <div><b id="statWarnings">0</b><span>предупреждений</span></div>
+    <div><b id="statChecks">0</b><span>OK</span></div>
+  </div>
+  <div class="fixed-summary" id="fixedSummary" hidden>
+    <div class="fixed-summary-head"><span class="eyebrow">ФАКТИЧЕСКИЕ ИСПРАВЛЕНИЯ</span><span class="micro">Что реально изменилось в рабочей копии</span></div>
+    <div class="fixed-summary-list" id="fixedSummaryList"></div>
+  </div>
+  <div class="issue-filters" id="issueFilters" hidden>
+    <button class="issue-filter active" data-filter="all" type="button">Все <span class="filter-count" id="filterCountAll">0</span></button>
+    <button class="issue-filter" data-filter="fixed" type="button">✓ Исправлено <span class="filter-count" id="filterCountFixed">0</span></button>
+    <button class="issue-filter" data-filter="warning" type="button">⚠ Предупреждения <span class="filter-count" id="filterCountWarn">0</span></button>
+    <button class="issue-filter" data-filter="info" type="button">ℹ Инфо <span class="filter-count" id="filterCountInfo">0</span></button>
+  </div>
+  <div class="issue-list" id="issueList"></div>
+  <div class="result-actions">
+    <button class="btn primary" id="downloadBtn" type="button">Скачать результат</button>
+    <a class="btn" id="reportBtn" href="#">JSON-отчёт</a>
+    <button class="btn" id="copyJobBtn" type="button">Копировать ID</button>
+    <button class="btn" id="healthBtn" type="button">Health</button>
+    <button class="btn" id="previewBtn" type="button">Repair Preview</button>
+    <button class="btn" id="diffBtn" type="button">Diff</button>
+    <button class="btn" id="resultFeedbackBtn" type="button">Обратная связь</button>
+    <button class="btn primary recovery-action" id="restartJobBtn" type="button" hidden>Перезапустить</button>
+    <button class="btn" id="newJobBtn" type="button">Новая задача</button>
+  </div>
+  <div class="result-file-note" id="resultFileNote"></div>
+</section>
+
+<footer class="footer">
+  <span>VA 2 · VE 1 · BeamNG.drive 0.39</span>
+  <button class="footer-link" id="feedbackFooter" type="button">Обратная связь и сообщения</button>
+  <span>Результаты хранятся ограниченное время</span>
+</footer>
+</main>
+</div>
+
+<!-- Modal -->
+<div id="quickHelp" class="quick-help" hidden aria-label="Горячие клавиши">
+  <div class="quick-help-card">
+    <div class="history-head"><div><span class="eyebrow">БЫСТРЫЕ ДЕЙСТВИЯ</span><h2>Горячие клавиши</h2></div><button class="ghost-icon" id="quickHelpClose" type="button" aria-label="Закрыть">✕</button></div>
+    <div class="shortcut-list">
+      <div><kbd>Ctrl/Cmd</kbd><b>+</b><kbd>Shift</kbd><b>+</b><kbd>U</kbd><span>Добавить файл или папку</span></div>
+      <div><kbd>Ctrl/Cmd</kbd><b>+</b><kbd>Shift</kbd><kbd>R</kbd><span>Запустить / повторить задачу</span></div>
+      <div><kbd>Ctrl/Cmd</kbd><b>+</b><kbd>↵ Enter</kbd><span>Запустить загруженную и подготовленную задачу</span></div>
+      <div><kbd>Ctrl/Cmd</kbd><b>+</b><kbd>Shift</kbd><kbd>P</kbd><span>Показать Repair Preview</span></div>
+      <div><kbd>Ctrl/Cmd</kbd><b>+</b><kbd>Shift</kbd><kbd>S</kbd><span>Открыть историю сессий</span></div>
+      <div><kbd>?</kbd><span>Показать эту подсказку</span></div>
+      <div><kbd>Esc</kbd><span>Закрыть меню или окно</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="interfaceInfo" class="interface-info" hidden aria-label="Информация об интерфейсе">
+  <div class="interface-info-backdrop" data-interface-close></div>
+  <section class="interface-info-card" role="dialog" aria-modal="true" aria-labelledby="interfaceInfoTitle">
+    <header class="interface-info-head">
+      <div><span class="eyebrow">ЦЕНТР ИНТЕРФЕЙСА</span><h2 id="interfaceInfoTitle">Как устроен ModMendryx</h2><p>Все элементы интерфейса собраны здесь по разделам — без необходимости искать подсказки в «⋮».</p></div>
+      <button class="ghost-icon" id="interfaceInfoClose" type="button" aria-label="Закрыть">✕</button>
+    </header>
+    <div class="interface-info-body">
+      <nav class="interface-info-nav" id="interfaceInfoNav" aria-label="Разделы справки"></nav>
+      <article class="interface-info-content" id="interfaceInfoContent"></article>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" type="button" aria-label="Закрыть">✕</button>
+    <div id="modalContent"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}</script>
+<script src="/runtime-config.js?v=062a"></script>
+<script src="/assets/halloween.js?v=062a" defer></script>
+<script src="/assets/app.js?v=062a" defer></script>
+</body>
+</html>
