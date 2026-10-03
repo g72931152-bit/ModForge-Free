@@ -1,1 +1,0 @@
-"""ModMendryx backend package."""
